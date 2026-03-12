@@ -15,7 +15,6 @@ namespace Domain.Entities
         public string LastName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
-        public string Password { get; set; }
         public string PasswordHash { get; set; }
         public string HashSalt { get; set; }
         public UserType UserType { get; set; }
@@ -27,12 +26,11 @@ namespace Domain.Entities
 			private set => _userRoles.AddRange(value);
 		}
 
-        public User(string firstName, string lastName, string email, string password, string passwordHash, string hashSalt, string phoneNo, string address, UserType userType)
+        public User(string firstName, string lastName, string email, string passwordHash, string hashSalt, string phoneNo, string address, UserType userType)
         {
             FirstName = firstName;
             LastName = lastName;
             Email = email;
-            Password = password;
             PasswordHash = passwordHash;
             HashSalt = 
             PhoneNumber = phoneNo;

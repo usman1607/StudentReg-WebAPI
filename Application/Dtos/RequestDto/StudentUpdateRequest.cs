@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dtos.RequestDto
+namespace Application.Dtos.RequestDto
 {
-    public class StudentRequestDto
+    public class StudentUpdateRequest
     {
     }
 }
