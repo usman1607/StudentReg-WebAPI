@@ -1,12 +1,6 @@
-﻿using Application.Repositories;
+﻿using Application.Dtos.RequestDto;
+using Application.Dtos.ResponseDto;
 using Application.Services.Interfaces;
-using Domain.Dtos.RequestDto;
-using Domain.Dtos.ResponseDto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services.Implementations
 {
@@ -29,7 +23,7 @@ namespace Application.Services.Implementations
 
         public StudentDto Update(Guid id, StudentUpdateRequest updateRequest)
         {
-            return new StudentDto();
+            throw new NotImplementedException();
         }
     }
 }
