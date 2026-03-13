@@ -26,14 +26,14 @@ namespace Domain.Entities
 			private set => _userRoles.AddRange(value);
 		}
 
-        public User(string firstName, string lastName, string email, string passwordHash, string hashSalt, string phoneNo, string address, UserType userType)
+        public User(string firstName, string lastName, string email, string passwordHash, string hashSalt, string phoneNumber, string address, UserType userType)
         {
             FirstName = firstName;
             LastName = lastName;
             Email = email;
             PasswordHash = passwordHash;
             HashSalt = hashSalt;
-            PhoneNumber = phoneNo;
+            PhoneNumber = phoneNumber;
             Address = address;
             UserType = userType;
         }
