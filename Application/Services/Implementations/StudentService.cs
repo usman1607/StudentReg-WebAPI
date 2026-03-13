@@ -35,16 +35,16 @@ namespace Application.Services.Implementations
             var matricNumber = GenerateMatricNumber();
 
             // Create password hash (in production, use proper hashing)
-            var (hash, salt) = GeneratePasswordHash();
+            var (hash, salt) = GeneratePasswordHash(request.Password);
 
             var student = new Student(
-                matricNo: matricNumber,
+                matricNumber: matricNumber,
                 firstName: request.FirstName,
                 lastName: request.LastName,
                 email: request.Email,
                 passwordHash: hash,
                 hashSalt: salt,
-                phoneNo: request.PhoneNo,
+                phoneNumber: request.PhoneNo,
                 address: request.Address,
                 createdBy: "System"
             );

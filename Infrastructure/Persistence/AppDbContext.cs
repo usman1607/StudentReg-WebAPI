@@ -13,6 +13,7 @@ namespace Infrastructure.Persistence
         public DbSet<Student> Students => Set<Student>();
         public DbSet<Instructor> Instructors => Set<Instructor>();
         public DbSet<Course> Courses => Set<Course>();
+        public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
