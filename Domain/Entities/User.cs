@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class User: BaseEntity
+    public abstract class User: BaseEntity
     {
         private readonly List<UserRole> _userRoles = new();
 
@@ -32,7 +32,7 @@ namespace Domain.Entities
             LastName = lastName;
             Email = email;
             PasswordHash = passwordHash;
-            HashSalt = 
+            HashSalt = hashSalt;
             PhoneNumber = phoneNo;
             Address = address;
             UserType = userType;

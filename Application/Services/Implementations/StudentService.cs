@@ -1,29 +1,190 @@
-﻿using Application.Dtos.RequestDto;
+﻿using Application.Dtos.Common;
+using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
+using Application.Exceptions;
+using Application.Repositories;
 using Application.Services.Interfaces;
+using AutoMapper;
+using Domain.Entities;
+using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
 namespace Application.Services.Implementations
 {
-    internal class StudentService : IStudentService
+    public class StudentService : IStudentService
     {
-        public Task<StudentDto> CreateAsync(StudentRequestDto request)
+        private readonly IStudentRepository _studentRepository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<StudentService> _logger;
+
+        public StudentService(
+            IStudentRepository studentRepository,
+            IMapper mapper,
+            ILogger<StudentService> logger)
         {
-            throw new NotImplementedException();
+            _studentRepository = studentRepository;
+            _mapper = mapper;
+            _logger = logger;
         }
 
-        public Task<List<StudentDto>> GetAllAsync()
+        public async Task<StudentDto> CreateAsync(StudentRequestDto request)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Creating new student with email: {Email}", request.Email);
+
+            // Generate matriculation number
+            var matricNumber = GenerateMatricNumber();
+
+            // Create password hash (in production, use proper hashing)
+            var (hash, salt) = GeneratePasswordHash();
+
+            var student = new Student(
+                matricNo: matricNumber,
+                firstName: request.FirstName,
+                lastName: request.LastName,
+                email: request.Email,
+                passwordHash: hash,
+                hashSalt: salt,
+                phoneNo: request.PhoneNo,
+                address: request.Address,
+                createdBy: "System"
+            );
+
+            var createdStudent = await _studentRepository.CreateAsync(student);
+            _logger.LogInformation("Student created successfully with ID: {StudentId}, MatricNumber: {MatricNumber}",
+                createdStudent.Id, createdStudent.MatricNumber);
+
+            return _mapper.Map<StudentDto>(createdStudent);
         }
 
-        public Task<StudentDto> GetAsync(string matricNo)
+        public async Task<StudentDto?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Fetching student by ID: {StudentId}", id);
+            var student = await _studentRepository.GetByIdAsync(id);
+
+            if (student == null)
+            {
+                _logger.LogWarning("Student with ID: {StudentId} not found", id);
+                return null;
+            }
+
+            return _mapper.Map<StudentDto>(student);
         }
 
-        public StudentDto Update(Guid id, StudentUpdateRequest updateRequest)
+        public async Task<StudentDto?> GetByMatricAsync(string matricNo)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Fetching student by MatricNumber: {MatricNumber}", matricNo);
+            var student = await _studentRepository.GetAsync(matricNo);
+
+            if (student == null)
+            {
+                _logger.LogWarning("Student with MatricNumber: {MatricNumber} not found", matricNo);
+                return null;
+            }
+
+            return _mapper.Map<StudentDto>(student);
+        }
+
+        public async Task<List<StudentDto>> GetAllAsync()
+        {
+            _logger.LogInformation("Fetching all students");
+            var students = await _studentRepository.GetAllAsync();
+            _logger.LogInformation("Found {Count} students", students.Count);
+            return _mapper.Map<List<StudentDto>>(students);
+        }
+
+        public async Task<PagedResult<StudentDto>> SearchAsync(string? searchTerm, int page, int pageSize, string? sortBy)
+        {
+            _logger.LogInformation(
+                "Searching students - SearchTerm: {SearchTerm}, Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}",
+                searchTerm, page, pageSize, sortBy);
+
+            // Ensure valid pagination parameters
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var pagedStudents = await _studentRepository.SearchAsync(searchTerm, page, pageSize, sortBy);
+
+            _logger.LogInformation("Search returned {Count} students out of {Total} total",
+                pagedStudents.Items.Count, pagedStudents.TotalCount);
+
+            var studentDtos = _mapper.Map<List<StudentDto>>(pagedStudents.Items);
+
+            return new PagedResult<StudentDto>(studentDtos, page, pageSize, pagedStudents.TotalCount);
+        }
+
+        public async Task<StudentDto?> UpdateAsync(Guid id, StudentUpdateRequest updateRequest)
+        {
+            _logger.LogInformation("Updating student with ID: {StudentId}", id);
+
+            var student = await _studentRepository.GetByIdAsync(id);
+            if (student == null)
+            {
+                _logger.LogWarning("Cannot update - Student with ID: {StudentId} not found", id);
+                return null;
+            }
+
+            // Apply updates only for non-null values
+            if (!string.IsNullOrEmpty(updateRequest.FirstName))
+                student.FirstName = updateRequest.FirstName;
+
+            if (!string.IsNullOrEmpty(updateRequest.LastName))
+                student.LastName = updateRequest.LastName;
+
+            if (!string.IsNullOrEmpty(updateRequest.Email))
+                student.Email = updateRequest.Email;
+
+            if (!string.IsNullOrEmpty(updateRequest.PhoneNumber))
+                student.PhoneNumber = updateRequest.PhoneNumber;
+
+            if (!string.IsNullOrEmpty(updateRequest.Address))
+                student.Address = updateRequest.Address;
+
+            if (updateRequest.Gender.HasValue)
+                student.Gender = updateRequest.Gender.Value;
+
+            student.UpdatedBy = "System";
+            student.UpdatedDate = DateTime.UtcNow;
+
+            var updatedStudent = await _studentRepository.UpdateAsync(student);
+            _logger.LogInformation("Student with ID: {StudentId} updated successfully", id);
+
+            return _mapper.Map<StudentDto>(updatedStudent);
+        }
+
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            _logger.LogInformation("Deleting student with ID: {StudentId}", id);
+
+            var result = await _studentRepository.DeleteAsync(id);
+
+            if (result)
+                _logger.LogInformation("Student with ID: {StudentId} deleted successfully", id);
+            else
+                _logger.LogWarning("Cannot delete - Student with ID: {StudentId} not found", id);
+
+            return result;
+        }
+
+        public async Task<bool> ExistsAsync(Guid id)
+        {
+            return await _studentRepository.ExistsAsync(id);
+        }
+
+        private static string GenerateMatricNumber()
+        {
+            var year = DateTime.UtcNow.Year;
+            var random = new Random().Next(10000, 99999);
+            return $"STU/{year}/{random}";
+        }
+
+        private static (string hash, string salt) GeneratePasswordHash(string passord)
+        {
+            var salt = Guid.NewGuid().ToString("N")[..16];
+            //var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(8));
+            var hash = Convert.ToBase64String(
+                System.Security.Cryptography.SHA256.HashData(
+                    System.Text.Encoding.UTF8.GetBytes($"{passord}{salt}")));
+            return (hash, salt);
         }
     }
 }
