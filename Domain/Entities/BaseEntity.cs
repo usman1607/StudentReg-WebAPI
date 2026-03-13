@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class BaseEntity
+    public abstract class BaseEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string CreatedBy { get; set; } = default!;
