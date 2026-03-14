@@ -57,7 +57,7 @@ namespace Infrastructure.Persistence.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(u => u.UserType)
-                .HasColumnName("user_type")
+                .HasColumnName("user_type_enum")
                 .HasColumnType("varchar(50)")
                 .HasConversion<EnumToStringConverter<UserType>>()
                 .IsRequired();
@@ -90,10 +90,13 @@ namespace Infrastructure.Persistence.EntityTypeConfigurations
             // Discriminator for TPH
             builder.HasDiscriminator<string>("user_type")
                 .HasValue<Student>("Student")
-                .HasValue<Instructor>("Instructor");
+                .HasValue<Staff>("Staff");
 
-            // Ignore UserRoles navigation for now (if not configured)
-            builder.Ignore(u => u.UserRoles);
+            // Configure UserRoles relationship
+            builder.HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

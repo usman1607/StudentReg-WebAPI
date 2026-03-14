@@ -19,9 +19,18 @@ namespace Infrastructure.Extensions
 
             // Repositories
             services.AddScoped<IStudentRepository, StudentRepository>();
+            services.AddScoped<IStaffRepository, StaffRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            services.AddScoped<ICourseRepository, CourseRepository>();
+            services.AddScoped<IStudentsCoursesRepository, StudentsCoursesRepository>();
 
             // Application Services
             services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IJwtService, JwtService>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(StudentMappingProfile).Assembly);

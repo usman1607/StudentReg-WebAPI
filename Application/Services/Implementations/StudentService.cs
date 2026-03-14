@@ -170,6 +170,32 @@ namespace Application.Services.Implementations
             return await _studentRepository.ExistsAsync(id);
         }
 
+        public async Task<StudentDto> AcceptAdmissionAsync(Guid studentId)
+        {
+            _logger.LogInformation("Student {StudentId} accepting admission offer", studentId);
+
+            var student = await _studentRepository.GetByIdAsync(studentId);
+            if (student == null)
+            {
+                throw new EntityNotFoundException($"Student with ID '{studentId}' not found.");
+            }
+
+            if (student.Status != Domain.Enums.StudentStatus.OfferedAdmission)
+            {
+                throw new ValidationException($"Student must have OfferedAdmission status to accept. Current status: {student.Status}");
+            }
+
+            student.Status = Domain.Enums.StudentStatus.Accepted;
+            student.UpdatedBy = student.Email;
+            student.UpdatedDate = DateTime.UtcNow;
+
+            await _studentRepository.UpdateAsync(student);
+
+            _logger.LogInformation("Student {StudentId} accepted admission. Status changed to Accepted", studentId);
+
+            return _mapper.Map<StudentDto>(student);
+        }
+
         private static string GenerateMatricNumber()
         {
             var year = DateTime.UtcNow.Year;

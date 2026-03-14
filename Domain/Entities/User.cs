@@ -1,13 +1,8 @@
 ﻿using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public abstract class User: BaseEntity
+    public abstract class User : BaseEntity
     {
         private readonly List<UserRole> _userRoles = new();
 
@@ -20,11 +15,16 @@ namespace Domain.Entities
         public UserType UserType { get; set; }
         public string Address { get; set; }
         public Gender Gender { get; set; }
-        public IList<UserRole> UserRoles
+
+        public ICollection<UserRole> UserRoles
         {
-			get => _userRoles.AsReadOnly();
-			private set => _userRoles.AddRange(value);
-		}
+            get => _userRoles;
+            private set
+            {
+                _userRoles.Clear();
+                _userRoles.AddRange(value);
+            }
+        }
 
         public User(string firstName, string lastName, string email, string passwordHash, string hashSalt, string phoneNumber, string address, UserType userType)
         {
@@ -36,6 +36,11 @@ namespace Domain.Entities
             PhoneNumber = phoneNumber;
             Address = address;
             UserType = userType;
+        }
+
+        public void AddRole(UserRole userRole)
+        {
+            _userRoles.Add(userRole);
         }
     }
 }

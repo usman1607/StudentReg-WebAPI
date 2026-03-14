@@ -1,6 +1,7 @@
 ﻿using Application.Dtos.Common;
 using Application.Repositories;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
@@ -41,6 +42,20 @@ namespace Infrastructure.Persistence.Repositories
             return await _appDbContext.Students
                 .Where(s => s.Id == id && !s.IsDeleted)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Student?> GetByEmailAsync(string email)
+        {
+            return await _appDbContext.Students
+                .Where(s => s.Email == email && !s.IsDeleted)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Student>> GetByStatusAsync(StudentStatus status)
+        {
+            return await _appDbContext.Students
+                .Where(s => s.Status == status && !s.IsDeleted)
+                .ToListAsync();
         }
 
         public async Task<PagedResult<Student>> SearchAsync(string? searchTerm, int page, int pageSize, string? sortBy)

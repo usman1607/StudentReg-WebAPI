@@ -1,7 +1,9 @@
 using Application.Dtos.RequestDto;
 using Application.Services.Interfaces;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
@@ -143,6 +145,7 @@ namespace WebAPI.Controllers
         /// <param name="id">Student's unique identifier</param>
         /// <returns>204 No Content on success, 404 if not found</returns>
         [HttpDelete("{id:guid}")]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
@@ -158,6 +161,43 @@ namespace WebAPI.Controllers
             }
 
             return NoContent();
+        }
+
+        /// <summary>
+        /// Accept admission offer (Student owner only)
+        /// </summary>
+        /// <param name="id">Student's unique identifier</param>
+        /// <returns>Updated student with Accepted status</returns>
+        [HttpPost("{id:guid}/accept-offer")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AcceptOffer([FromRoute] Guid id)
+        {
+            _logger.LogInformation("POST /students/{StudentId}/accept-offer", id);
+
+            // Verify the authenticated user is the owner of this student record
+            var currentUserId = User.FindFirstValue("userId")
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(currentUserId) || !Guid.TryParse(currentUserId, out var userId))
+            {
+                return Unauthorized(new { message = "User ID not found in token." });
+            }
+
+            if (userId != id)
+            {
+                _logger.LogWarning("User {UserId} attempted to accept offer for student {StudentId}", userId, id);
+                return Forbid();
+            }
+
+            var student = await _studentService.AcceptAdmissionAsync(id);
+
+            _logger.LogInformation("Student {StudentId} accepted admission offer", id);
+
+            return Ok(student);
         }
     }
 }
