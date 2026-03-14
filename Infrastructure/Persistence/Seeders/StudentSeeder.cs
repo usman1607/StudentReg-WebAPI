@@ -15,9 +15,6 @@ namespace Infrastructure.Persistence.Seeders
 
             try
             {
-                // Ensure database is created and migrations applied
-                await context.Database.MigrateAsync();
-
                 // Check if data already exists
                 if (await context.Students.AnyAsync())
                 {
