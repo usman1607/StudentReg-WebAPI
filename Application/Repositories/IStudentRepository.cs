@@ -12,7 +12,7 @@ namespace Application.Repositories
         Task<Student> CreateAsync(Student student);
         Task<List<Student>> GetAllAsync();
         Task<List<Student>> GetByStatusAsync(StudentStatus status);
-        Task<PagedResult<Student>> SearchAsync(string? searchTerm, int page, int pageSize, string? sortBy);
+        Task<PagedResult<Student>> SearchAsync(string? searchTerm, StudentStatus? status, int page, int pageSize, string? sortBy);
         Task<Student> UpdateAsync(Student student);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);

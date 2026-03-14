@@ -58,9 +58,14 @@ namespace Infrastructure.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PagedResult<Student>> SearchAsync(string? searchTerm, int page, int pageSize, string? sortBy)
+        public async Task<PagedResult<Student>> SearchAsync(string? searchTerm, StudentStatus? status, int page, int pageSize, string? sortBy)
         {
             var query = _appDbContext.Students.Where(s => !s.IsDeleted).AsQueryable();
+
+            if(status.HasValue)
+            {
+                query = query.Where(s => s.Status == status.Value);
+            }
 
             // Apply search filter
             if (!string.IsNullOrWhiteSpace(searchTerm))

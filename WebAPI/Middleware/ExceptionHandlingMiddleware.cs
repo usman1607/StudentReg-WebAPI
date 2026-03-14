@@ -43,7 +43,7 @@ namespace WebAPI.Middleware
                     response.Details = new { notFoundEx.EntityName, notFoundEx.EntityId };
                     break;
 
-                case Application.Exceptions.ValidationException validationEx:
+                case ValidationException validationEx:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
                     response.Message = validationEx.Message;

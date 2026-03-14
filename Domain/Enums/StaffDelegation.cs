@@ -4,6 +4,8 @@ namespace Domain.Enums
     {
         Admin = 1,
         Instructor,
-        OtherStaff
+        Registrar,
+        AcademicAdvisor,
+        OtherStaff,
     }
 }

@@ -1,8 +1,10 @@
 using Application.Dtos.RequestDto;
+using Application.Repositories;
 using Asp.Versioning;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure.Extensions;
+using Infrastructure.Persistence.Repositories;
 using Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -109,6 +111,8 @@ builder.Services.AddSwaggerGen(options =>
 
 // Infrastructure services (Database, Repositories, Services, AutoMapper)
 builder.Services.AddInfrastructure(configuration);
+
+//builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 var app = builder.Build();
 

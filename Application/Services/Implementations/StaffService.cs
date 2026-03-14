@@ -1,6 +1,7 @@
 using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
 using Application.Exceptions;
+using Application.Helpers;
 using Application.Repositories;
 using Application.Services.Interfaces;
 using AutoMapper;
@@ -59,10 +60,10 @@ namespace Application.Services.Implementations
             }
 
             // Generate staff number
-            var staffNumber = GenerateStaffNumber(request.Delegation);
+            var staffNumber = UserHelper.GenerateStaffNumber(request.Delegation);
 
             // Create password hash
-            var (hash, salt) = GeneratePasswordHash(request.Password);
+            var (hash, salt) = UserHelper.GeneratePasswordHash(request.Password);
 
             var staff = new Staff(
                 staffNumber: staffNumber,
@@ -260,28 +261,6 @@ namespace Application.Services.Implementations
 
             _logger.LogInformation("Assigned {Count} courses to student {StudentId}",
                 newAssignments.Count, request.StudentId);
-        }
-
-        private static string GenerateStaffNumber(StaffDelegation delegation)
-        {
-            var prefix = delegation switch
-            {
-                StaffDelegation.Admin => "ADM",
-                StaffDelegation.Instructor => "INS",
-                _ => "STF"
-            };
-            var year = DateTime.UtcNow.Year;
-            var random = new Random().Next(10000, 99999);
-            return $"{prefix}/{year}/{random}";
-        }
-
-        private static (string hash, string salt) GeneratePasswordHash(string password)
-        {
-            var salt = Guid.NewGuid().ToString("N")[..16];
-            var hash = Convert.ToBase64String(
-                System.Security.Cryptography.SHA256.HashData(
-                    System.Text.Encoding.UTF8.GetBytes($"{password}{salt}")));
-            return (hash, salt);
         }
 
         private static StaffDto MapToDto(Staff staff)

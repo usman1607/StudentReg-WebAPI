@@ -2,10 +2,12 @@
 using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
 using Application.Exceptions;
+using Application.Helpers;
 using Application.Repositories;
 using Application.Services.Interfaces;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 
@@ -32,10 +34,10 @@ namespace Application.Services.Implementations
             _logger.LogInformation("Creating new student with email: {Email}", request.Email);
 
             // Generate matriculation number
-            var matricNumber = GenerateMatricNumber();
+            var matricNumber = UserHelper.GenerateMatricNumber();
 
             // Create password hash (in production, use proper hashing)
-            var (hash, salt) = GeneratePasswordHash(request.Password);
+            var (hash, salt) = UserHelper.GeneratePasswordHash(request.Password);
 
             var student = new Student(
                 matricNumber: matricNumber,
@@ -46,7 +48,7 @@ namespace Application.Services.Implementations
                 hashSalt: salt,
                 phoneNumber: request.PhoneNo,
                 address: request.Address,
-                createdBy: "System"
+                createdBy: request.Email
             );
 
             var createdStudent = await _studentRepository.CreateAsync(student);
@@ -92,7 +94,7 @@ namespace Application.Services.Implementations
             return _mapper.Map<List<StudentDto>>(students);
         }
 
-        public async Task<PagedResult<StudentDto>> SearchAsync(string? searchTerm, int page, int pageSize, string? sortBy)
+        public async Task<PagedResult<StudentDto>> SearchAsync(string? searchTerm, StudentStatus? status, int page, int pageSize, string? sortBy)
         {
             _logger.LogInformation(
                 "Searching students - SearchTerm: {SearchTerm}, Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}",
@@ -102,7 +104,7 @@ namespace Application.Services.Implementations
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 100);
 
-            var pagedStudents = await _studentRepository.SearchAsync(searchTerm, page, pageSize, sortBy);
+            var pagedStudents = await _studentRepository.SearchAsync(searchTerm, status, page, pageSize, sortBy);
 
             _logger.LogInformation("Search returned {Count} students out of {Total} total",
                 pagedStudents.Items.Count, pagedStudents.TotalCount);
@@ -196,21 +198,5 @@ namespace Application.Services.Implementations
             return _mapper.Map<StudentDto>(student);
         }
 
-        private static string GenerateMatricNumber()
-        {
-            var year = DateTime.UtcNow.Year;
-            var random = new Random().Next(10000, 99999);
-            return $"STU/{year}/{random}";
-        }
-
-        private static (string hash, string salt) GeneratePasswordHash(string passord)
-        {
-            var salt = Guid.NewGuid().ToString("N")[..16];
-            //var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(8));
-            var hash = Convert.ToBase64String(
-                System.Security.Cryptography.SHA256.HashData(
-                    System.Text.Encoding.UTF8.GetBytes($"{passord}{salt}")));
-            return (hash, salt);
-        }
     }
 }

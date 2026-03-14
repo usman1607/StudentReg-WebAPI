@@ -1,6 +1,7 @@
 using Application.Dtos.RequestDto;
 using Application.Services.Interfaces;
 using Asp.Versioning;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -34,6 +35,7 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? searchTerm = null,
+            [FromQuery] StudentStatus? status = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? sortBy = null)
@@ -42,7 +44,7 @@ namespace WebAPI.Controllers
                 "GET /students - SearchTerm: {SearchTerm}, Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}",
                 searchTerm, page, pageSize, sortBy);
 
-            var result = await _studentService.SearchAsync(searchTerm, page, pageSize, sortBy);
+            var result = await _studentService.SearchAsync(searchTerm, status, page, pageSize, sortBy);
             return Ok(result);
         }
 

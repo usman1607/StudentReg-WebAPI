@@ -1,6 +1,7 @@
 ﻿using Application.Dtos.Common;
 using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
+using Domain.Enums;
 
 namespace Application.Services.Interfaces
 {
@@ -10,7 +11,7 @@ namespace Application.Services.Interfaces
         Task<StudentDto?> GetByIdAsync(Guid id);
         Task<StudentDto> CreateAsync(StudentRequestDto request);
         Task<List<StudentDto>> GetAllAsync();
-        Task<PagedResult<StudentDto>> SearchAsync(string? searchTerm, int page, int pageSize, string? sortBy);
+        Task<PagedResult<StudentDto>> SearchAsync(string? searchTerm, StudentStatus? status, int page, int pageSize, string? sortBy);
         Task<StudentDto?> UpdateAsync(Guid id, StudentUpdateRequest updateRequest);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
