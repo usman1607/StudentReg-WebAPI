@@ -127,13 +127,11 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger";
     });
 
-    // Seed database in development
+    // Initialize database (migrate + seed) in development
     var seedDatabase = configuration.GetValue<bool>("SeedDatabase");
     if (seedDatabase)
     {
-        await RoleSeeder.SeedAsync(app.Services);
-        await StaffSeeder.SeedAsync(app.Services);
-        await StudentSeeder.SeedAsync(app.Services);
+        await DatabaseInitializer.InitializeAsync(app.Services);
     }
 }
 
