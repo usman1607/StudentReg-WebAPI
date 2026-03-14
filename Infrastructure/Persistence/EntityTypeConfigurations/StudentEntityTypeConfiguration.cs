@@ -1,6 +1,8 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Persistence.EntityTypeConfigurations
 {
@@ -16,6 +18,12 @@ namespace Infrastructure.Persistence.EntityTypeConfigurations
 
             builder.HasIndex(s => s.MatricNumber)
                 .IsUnique();
+
+            builder.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasColumnType("varchar(50)")
+                .HasConversion<EnumToStringConverter<StudentStatus>>()
+                .IsRequired();
         }
     }
 }

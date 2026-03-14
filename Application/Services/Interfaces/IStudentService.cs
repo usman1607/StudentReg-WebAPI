@@ -14,5 +14,6 @@ namespace Application.Services.Interfaces
         Task<StudentDto?> UpdateAsync(Guid id, StudentUpdateRequest updateRequest);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
+        Task<StudentDto> AcceptAdmissionAsync(Guid studentId);
     }
 }

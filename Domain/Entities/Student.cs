@@ -2,13 +2,29 @@
 
 namespace Domain.Entities
 {
-    public class Student: User
+    public class Student : User
     {
         public string MatricNumber { get; set; } = default!;
-        public Student(string matricNumber, string firstName, string lastName, string email, string passwordHash, string hashSalt, string phoneNumber, string address, string createdBy): base(firstName, lastName, email, passwordHash, hashSalt, phoneNumber, address, UserType.Student)
+        public StudentStatus Status { get; set; } = StudentStatus.Pending;
+
+        public Student(
+            string matricNumber,
+            string firstName,
+            string lastName,
+            string email,
+            string passwordHash,
+            string hashSalt,
+            string phoneNumber,
+            string address,
+            string createdBy)
+            : base(firstName, lastName, email, passwordHash, hashSalt, phoneNumber, address, UserType.Student)
         {
             MatricNumber = matricNumber;
+            Status = StudentStatus.Pending;
             CreatedBy = createdBy;
         }
+
+        // EF Core parameterless constructor
+        protected Student() : base("", "", "", "", "", "", "", UserType.Student) { }
     }
 }
