@@ -275,8 +275,8 @@ namespace Application.Services.Implementations
                 Email = staff.Email,
                 PhoneNumber = staff.PhoneNumber,
                 Address = staff.Address,
-                Delegation = staff.Delegation,
-                Gender = staff.Gender,
+                Delegation = staff.Delegation.ToString(),
+                Gender = staff.Gender.ToString(),
                 Roles = staff.UserRoles
                     .Where(ur => ur.Role != null)
                     .Select(ur => ur.Role.Name)

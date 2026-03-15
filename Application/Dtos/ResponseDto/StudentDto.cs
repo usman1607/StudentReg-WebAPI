@@ -1,6 +1,4 @@
-﻿using Domain.Enums;
-
-namespace Application.Dtos.ResponseDto
+﻿namespace Application.Dtos.ResponseDto
 {
     public class StudentDto
     {
