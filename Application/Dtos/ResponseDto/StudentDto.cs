@@ -11,8 +11,8 @@ namespace Application.Dtos.ResponseDto
         public string Email { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
         public string Address { get; set; } = default!;
-        public Gender Gender { get; set; }
-        public StudentStatus Status { get; set; }
+        public string Gender { get; set; } = default!;
+        public string Status { get; set; } = default!;
         public DateTime CreatedDate { get; set; }
         public string CreatedBy { get; set; } = default!;
         public DateTime? UpdatedDate { get; set; }
