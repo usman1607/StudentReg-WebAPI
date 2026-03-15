@@ -1,13 +1,20 @@
-﻿using Application.Dtos.RequestDto;
+﻿using Application.Dtos.Common;
+using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
+using Domain.Enums;
 
 namespace Application.Services.Interfaces
 {
     public interface IStudentService
     {
-        Task<StudentDto> GetAsync(string matricNo);
+        Task<StudentDto?> GetByMatricAsync(string matricNo);
+        Task<StudentDto?> GetByIdAsync(Guid id);
         Task<StudentDto> CreateAsync(StudentRequestDto request);
         Task<List<StudentDto>> GetAllAsync();
-        StudentDto Update(Guid id, StudentUpdateRequest updateRequest);
+        Task<PagedResult<StudentDto>> SearchAsync(string? searchTerm, StudentStatus? status, int page, int pageSize, string? sortBy);
+        Task<StudentDto?> UpdateAsync(Guid id, StudentUpdateRequest updateRequest);
+        Task<bool> DeleteAsync(Guid id);
+        Task<bool> ExistsAsync(Guid id);
+        Task<StudentDto> AcceptAdmissionAsync(Guid studentId);
     }
 }
