@@ -13,6 +13,7 @@ namespace Application.Dtos.RequestDto
         public Gender Gender { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
         public string Address { get; set; } = default!;
+        public List<Guid> RoleIds { get; set; } = new List<Guid>();
         public StaffDelegation Delegation { get; set; }
     }
 
@@ -40,6 +41,9 @@ namespace Application.Dtos.RequestDto
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty()
                 .Equal(x => x.Password).WithMessage("Passwords do not match.");
+
+            RuleFor(x => x.RoleIds)
+                .NotEmpty().WithMessage("At least one role must be assigned.");
 
             RuleFor(x => x.Delegation)
                 .IsInEnum().WithMessage("Invalid delegation value.");

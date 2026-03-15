@@ -27,6 +27,13 @@ namespace Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync();
         }
 
+        public Task<List<Role>> GetByIdsAsync(IEnumerable<Guid> ids)
+        {
+            return _context.Roles
+                .Where(r => ids.Contains(r.Id) && !r.IsDeleted)
+                .ToListAsync();
+        }
+
         public async Task<Role?> GetByNameAsync(string name)
         {
             return await _context.Roles
