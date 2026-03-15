@@ -13,6 +13,7 @@ namespace Application.Services.Implementations
 {
     public class StaffService : IStaffService
     {
+        private readonly IRoleRepository _roleRepository;
         private readonly IStaffRepository _staffRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IUserRepository _userRepository;
@@ -22,12 +23,8 @@ namespace Application.Services.Implementations
         private readonly IMapper _mapper;
         private readonly ILogger<StaffService> _logger;
 
-        // Role IDs (matching RoleSeeder)
-        private static readonly Guid AdminRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        private static readonly Guid StudentRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        private static readonly Guid InstructorRoleId = Guid.Parse("33333333-3333-3333-3333-333333333333");
-
         public StaffService(
+            IRoleRepository roleRepository,
             IStaffRepository staffRepository,
             IStudentRepository studentRepository,
             IUserRepository userRepository,
@@ -37,6 +34,7 @@ namespace Application.Services.Implementations
             IMapper mapper,
             ILogger<StaffService> logger)
         {
+            _roleRepository = roleRepository;
             _staffRepository = staffRepository;
             _studentRepository = studentRepository;
             _userRepository = userRepository;
@@ -65,6 +63,14 @@ namespace Application.Services.Implementations
             // Create password hash
             var (hash, salt) = UserHelper.GeneratePasswordHash(request.Password);
 
+            var roles = await _roleRepository.GetByIdsAsync(request.RoleIds);
+            if (roles.Count != request.RoleIds.Count)
+            {
+                var existingRoleIds = roles.Select(r => r.Id).ToHashSet();
+                var missingRoleIds = request.RoleIds.Where(id => !existingRoleIds.Contains(id)).ToList();
+                throw new ValidationException($"Roles not found: {string.Join(", ", missingRoleIds)}");
+            }
+
             var staff = new Staff(
                 staffNumber: staffNumber,
                 firstName: request.FirstName,
@@ -79,26 +85,17 @@ namespace Application.Services.Implementations
                 createdBy: createdBy
             );
 
-            var createdStaff = await _staffRepository.CreateAsync(staff);
-
-            // Assign appropriate role based on delegation
-            var roleId = request.Delegation switch
+            foreach (var role in roles)
             {
-                StaffDelegation.Admin => AdminRoleId,
-                StaffDelegation.Instructor => InstructorRoleId,
-                _ => (Guid?)null
-            };
-
-            if (roleId.HasValue)
-            {
-                var userRole = new UserRole
+                staff.UserRoles.Add(new UserRole
                 {
-                    UserId = createdStaff.Id,
-                    RoleId = roleId.Value,
+                    RoleId = role.Id,
+                    UserId = staff.Id,
                     CreatedBy = createdBy
-                };
-                await _userRoleRepository.CreateAsync(userRole);
+                });
             }
+
+            var createdStaff = await _staffRepository.CreateAsync(staff);
 
             _logger.LogInformation("Staff created successfully with ID: {StaffId}, StaffNumber: {StaffNumber}",
                 createdStaff.Id, createdStaff.StaffNumber);
@@ -151,19 +148,6 @@ namespace Application.Services.Implementations
             student.UpdatedDate = DateTime.UtcNow;
 
             await _studentRepository.UpdateAsync(student);
-
-            // Assign Student role if not already assigned
-            var roleExists = await _userRoleRepository.ExistsAsync(studentId, StudentRoleId);
-            if (!roleExists)
-            {
-                var userRole = new UserRole
-                {
-                    UserId = studentId,
-                    RoleId = StudentRoleId,
-                    CreatedBy = staff.Email
-                };
-                await _userRoleRepository.CreateAsync(userRole);
-            }
 
             _logger.LogInformation("Student {StudentId} approved. Status changed to OfferedAdmission", studentId);
 
