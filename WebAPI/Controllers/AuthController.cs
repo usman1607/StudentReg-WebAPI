@@ -54,7 +54,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> Register([FromBody] StudentRequestDto request)
         {
             _logger.LogInformation("POST /auth/register - Registering student: {Email}", request.Email);
-
+            
             var result = await _authService.RegisterStudentAsync(request);
 
             _logger.LogInformation("Student registered successfully: {Email}", request.Email);

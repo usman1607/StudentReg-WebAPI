@@ -36,5 +36,13 @@ namespace Application.Helpers
             var random = new Random().Next(10000, 99999);
             return $"STU/{year}/{random}";
         }
+
+        public static bool VerifyPassword(string password, string storedHash, string storedSalt)
+        {
+            var hash = Convert.ToBase64String(
+                System.Security.Cryptography.SHA256.HashData(
+                    System.Text.Encoding.UTF8.GetBytes($"{password}{storedSalt}")));
+            return hash == storedHash;
+        }
     }
 }
