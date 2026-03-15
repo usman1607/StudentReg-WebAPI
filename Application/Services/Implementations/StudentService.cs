@@ -6,24 +6,27 @@ using Application.Helpers;
 using Application.Repositories;
 using Application.Services.Interfaces;
 using AutoMapper;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Logging;
-using System.Security.Cryptography;
 
 namespace Application.Services.Implementations
 {
     public class StudentService : IStudentService
     {
+        private readonly IRoleRepository _roleRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<StudentService> _logger;
 
         public StudentService(
+            IRoleRepository roleRepository,
             IStudentRepository studentRepository,
             IMapper mapper,
             ILogger<StudentService> logger)
         {
+            _roleRepository = roleRepository;
             _studentRepository = studentRepository;
             _mapper = mapper;
             _logger = logger;
@@ -51,6 +54,18 @@ namespace Application.Services.Implementations
                 address: request.Address,
                 createdBy: request.Email
             );
+
+            var role = await _roleRepository.GetByNameAsync(RoleNames.Student);
+            if (role != null)
+            {
+                var userRole = new UserRole
+                {
+                    UserId = student.Id,
+                    RoleId = role.Id,
+                    CreatedBy = "System"
+                };
+                student.AddRole(userRole);
+            }
 
             var createdStudent = await _studentRepository.CreateAsync(student);
             _logger.LogInformation("Student created successfully with ID: {StudentId}, MatricNumber: {MatricNumber}",
