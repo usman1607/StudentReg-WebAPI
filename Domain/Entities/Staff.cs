@@ -14,11 +14,12 @@ namespace Domain.Entities
             string email,
             string passwordHash,
             string hashSalt,
+            Gender gender,
             string phoneNumber,
             string address,
             StaffDelegation delegation,
             string createdBy)
-            : base(firstName, lastName, email, passwordHash, hashSalt, phoneNumber, address, UserType.Staff)
+            : base(firstName, lastName, email, passwordHash, hashSalt, gender, phoneNumber, address, UserType.Staff)
         {
             StaffNumber = staffNumber;
             Delegation = delegation;
@@ -26,6 +27,6 @@ namespace Domain.Entities
         }
 
         // EF Core parameterless constructor
-        protected Staff() : base("", "", "", "", "", "", "", UserType.Staff) { }
+        protected Staff() : base("", "", "", "", "", Gender.Male, "", "", UserType.Staff) { }
     }
 }

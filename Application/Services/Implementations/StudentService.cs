@@ -46,6 +46,7 @@ namespace Application.Services.Implementations
                 email: request.Email,
                 passwordHash: hash,
                 hashSalt: salt,
+                gender: request.Gender,
                 phoneNumber: request.PhoneNo,
                 address: request.Address,
                 createdBy: request.Email
