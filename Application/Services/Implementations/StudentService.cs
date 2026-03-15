@@ -15,17 +15,20 @@ namespace Application.Services.Implementations
 {
     public class StudentService : IStudentService
     {
+        private readonly IAuthService _authService;
         private readonly IRoleRepository _roleRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<StudentService> _logger;
 
         public StudentService(
+            IAuthService authService,
             IRoleRepository roleRepository,
             IStudentRepository studentRepository,
             IMapper mapper,
             ILogger<StudentService> logger)
         {
+            _authService = authService;
             _roleRepository = roleRepository;
             _studentRepository = studentRepository;
             _mapper = mapper;
@@ -91,12 +94,20 @@ namespace Application.Services.Implementations
         public async Task<StudentDto?> GetByMatricAsync(string matricNo)
         {
             _logger.LogInformation("Fetching student by MatricNumber: {MatricNumber}", matricNo);
+
             var student = await _studentRepository.GetAsync(matricNo);
 
             if (student == null)
             {
                 _logger.LogWarning("Student with MatricNumber: {MatricNumber} not found", matricNo);
-                return null;
+                throw new EntityNotFoundException($"Student with MatricNumber '{matricNo}' not found.");
+            }
+            
+            var signedInEmail = _authService.GetSignedInEmail();
+            if (_authService.IsStudent() && signedInEmail != student.Email)
+            {
+                _logger.LogWarning("Unauthorized access attempt to get student details with MatricNumber: {MatricNumber} by email: {Email}", matricNo, signedInEmail);
+                throw new UnauthorizedAccessException("You are not authorized to access this student's information.");
             }
 
             return _mapper.Map<StudentDto>(student);

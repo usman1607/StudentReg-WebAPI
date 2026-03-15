@@ -110,6 +110,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Infrastructure services (Database, Repositories, Services, AutoMapper)
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddInfrastructure(configuration);
 
 //builder.Services.AddScoped<IStudentRepository, StudentRepository>();

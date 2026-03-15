@@ -8,6 +8,7 @@ using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
@@ -31,6 +32,7 @@ namespace WebAPI.Controllers
         /// <param name="pageSize">Items per page (default: 10, max: 100)</param>
         /// <param name="sortBy">Sort field (firstname, lastname, matricnumber, createddate) with optional _desc suffix</param>
         /// <returns>Paginated list of students</returns>
+        [Authorize(Policy = "AdminOrInstructor")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
@@ -53,6 +55,7 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <param name="id">Student's unique identifier</param>
         /// <returns>Student details or 404 if not found</returns>
+        [Authorize(Policy = "AdminOrInstructor")]
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -99,6 +102,7 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <param name="request">Student creation request</param>
         /// <returns>Created student with 201 status code</returns>
+        [AllowAnonymous]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -171,7 +175,7 @@ namespace WebAPI.Controllers
         /// <param name="id">Student's unique identifier</param>
         /// <returns>Updated student with Accepted status</returns>
         [HttpPost("{id:guid}/accept-offer")]
-        [Authorize]
+        [Authorize(Policy = "StudentOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

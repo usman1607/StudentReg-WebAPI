@@ -1,5 +1,3 @@
-using Domain.Enums;
-
 namespace Application.Dtos.ResponseDto
 {
     public class StaffDto
@@ -11,8 +9,8 @@ namespace Application.Dtos.ResponseDto
         public string Email { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
         public string Address { get; set; } = default!;
-        public StaffDelegation Delegation { get; set; }
-        public Gender Gender { get; set; }
+        public string Delegation { get; set; } = default!;
+        public string Gender { get; set; } = default!;
         public List<string> Roles { get; set; } = new();
         public DateTime CreatedDate { get; set; }
         public string CreatedBy { get; set; } = default!;
