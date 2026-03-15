@@ -1,33 +1,44 @@
 using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
 using Application.Exceptions;
+using Application.Helpers;
 using Application.Repositories;
 using Application.Services.Interfaces;
+using Domain.Constants;
 using Domain.Entities;
+using Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace Application.Services.Implementations
 {
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IJwtService _jwtService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
             IUserRepository userRepository,
+            IRoleRepository roleRepository,
             IStudentRepository studentRepository,
             IJwtService jwtService,
             IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor,
             ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
             _studentRepository = studentRepository;
             _jwtService = jwtService;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
@@ -43,7 +54,7 @@ namespace Application.Services.Implementations
             }
 
             // Verify password
-            if (!VerifyPassword(request.Password, user.PasswordHash, user.HashSalt))
+            if (!UserHelper.VerifyPassword(request.Password, user.PasswordHash, user.HashSalt))
             {
                 _logger.LogWarning("Login failed - invalid password for: {Email}", request.Email);
                 throw new ValidationException("Invalid email or password.");
@@ -97,10 +108,10 @@ namespace Application.Services.Implementations
             }
 
             // Generate matriculation number
-            var matricNumber = GenerateMatricNumber();
+            var matricNumber = UserHelper.GenerateMatricNumber();
 
             // Create password hash
-            var (hash, salt) = GeneratePasswordHash(request.Password);
+            var (hash, salt) = UserHelper.GeneratePasswordHash(request.Password);
 
             var student = new Student(
                 matricNumber: matricNumber,
@@ -115,13 +126,21 @@ namespace Application.Services.Implementations
                 createdBy: "Self-Registration"
             );
 
+            var role = await _roleRepository.GetByNameAsync(RoleNames.Student);
+            if (role != null)
+            {
+                var userRole = new UserRole
+                {
+                    UserId = student.Id,
+                    RoleId = role.Id,
+                    CreatedBy = "System"
+                };
+                student.AddRole(userRole);
+            }
+
             var createdStudent = await _studentRepository.CreateAsync(student);
-
-            // Assign Student role
-            // Note: Role assignment is handled separately via UserRole
-
-            // Get roles (empty for new students until role is assigned)
-            var roles = new List<string> { "Student" };
+            
+            var roles = new List<string> { RoleNames.Student };
 
             // Generate JWT token
             var token = _jwtService.GenerateToken(createdStudent, roles);
@@ -146,29 +165,15 @@ namespace Application.Services.Implementations
                 }
             };
         }
-
-        private static bool VerifyPassword(string password, string storedHash, string storedSalt)
+                
+        public string GetSignedInEmail()
         {
-            var hash = Convert.ToBase64String(
-                System.Security.Cryptography.SHA256.HashData(
-                    System.Text.Encoding.UTF8.GetBytes($"{password}{storedSalt}")));
-            return hash == storedHash;
+            return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value ?? "";
         }
 
-        private static string GenerateMatricNumber()
+        public bool IsStudent()
         {
-            var year = DateTime.UtcNow.Year;
-            var random = new Random().Next(10000, 99999);
-            return $"STU/{year}/{random}";
-        }
-
-        private static (string hash, string salt) GeneratePasswordHash(string password)
-        {
-            var salt = Guid.NewGuid().ToString("N")[..16];
-            var hash = Convert.ToBase64String(
-                System.Security.Cryptography.SHA256.HashData(
-                    System.Text.Encoding.UTF8.GetBytes($"{password}{salt}")));
-            return (hash, salt);
+            return _httpContextAccessor.HttpContext?.User?.FindFirst("userType")?.Value == UserType.Student.ToString();
         }
     }
 }
