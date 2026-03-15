@@ -1,6 +1,7 @@
 using Application.Dtos.RequestDto;
 using Application.Repositories;
 using Asp.Versioning;
+using Domain.Constants;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure.Extensions;
@@ -48,10 +49,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("InstructorOnly", policy => policy.RequireRole("Instructor"));
-    options.AddPolicy("StudentOnly", policy => policy.RequireRole("Student"));
-    options.AddPolicy("AdminOrInstructor", policy => policy.RequireRole("Admin", "Instructor"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole(RoleNames.Admin));
+    options.AddPolicy("InstructorOnly", policy => policy.RequireRole(RoleNames.Instructor));
+    options.AddPolicy("StudentOnly", policy => policy.RequireRole(RoleNames.Student));
+    options.AddPolicy("AdminOrInstructor", policy => policy.RequireRole(RoleNames.Admin, RoleNames.Instructor));
 });
 
 // API Versioning

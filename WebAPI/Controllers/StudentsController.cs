@@ -102,7 +102,6 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <param name="request">Student creation request</param>
         /// <returns>Created student with 201 status code</returns>
-        [AllowAnonymous]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
