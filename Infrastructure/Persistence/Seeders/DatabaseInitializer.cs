@@ -21,7 +21,7 @@ namespace Infrastructure.Persistence.Seeders
                 // Seed data in order
                 await RoleSeeder.SeedAsync(serviceProvider);
                 await StaffSeeder.SeedAsync(serviceProvider);
-                await StudentSeeder.SeedAsync(serviceProvider);
+                //await StudentSeeder.SeedAsync(serviceProvider);
 
                 logger.LogInformation("Database initialization completed");
             }

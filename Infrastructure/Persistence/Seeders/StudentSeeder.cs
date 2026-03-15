@@ -33,54 +33,12 @@ namespace Infrastructure.Persistence.Seeders
                         email: "john.doe@university.edu",
                         passwordHash: "hashed_password_1",
                         hashSalt: "salt_1",
+                        gender: Domain.Enums.Gender.Male,
                         phoneNumber: "+234801234567",
                         address: "123 University Road, Lagos",
                         createdBy: "System"
-                    ),
-                    new Student(
-                        matricNumber: "STU/2024/10002",
-                        firstName: "Jane",
-                        lastName: "Smith",
-                        email: "jane.smith@university.edu",
-                        passwordHash: "hashed_password_2",
-                        hashSalt: "salt_2",
-                        phoneNumber: "+234802345678",
-                        address: "456 College Avenue, Abuja",
-                        createdBy: "System"
-                    ),
-                    new Student(
-                        matricNumber: "STU/2024/10003",
-                        firstName: "Michael",
-                        lastName: "Johnson",
-                        email: "michael.johnson@university.edu",
-                        passwordHash: "hashed_password_3",
-                        hashSalt: "salt_3",
-                        phoneNumber: "+234803456789",
-                        address: "789 Campus Drive, Port Harcourt",
-                        createdBy: "System"
-                    ),
-                    new Student(
-                        matricNumber: "STU/2024/10004",
-                        firstName: "Emily",
-                        lastName: "Brown",
-                        email: "emily.brown@university.edu",
-                        passwordHash: "hashed_password_4",
-                        hashSalt: "salt_4",
-                        phoneNumber: "+234804567890",
-                        address: "321 Education Street, Ibadan",
-                        createdBy: "System"
-                    ),
-                    new Student(
-                        matricNumber: "STU/2024/10005",
-                        firstName: "David",
-                        lastName: "Wilson",
-                        email: "david.wilson@university.edu",
-                        passwordHash: "hashed_password_5",
-                        hashSalt: "salt_5",
-                        phoneNumber: "+234805678901",
-                        address: "654 Learning Lane, Kano",
-                        createdBy: "System"
                     )
+                    
                 };
 
                 await context.Students.AddRangeAsync(students);

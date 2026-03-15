@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Domain.Enums;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Application.Dtos.RequestDto
         public DateOnly DateOfBirth { get; set; } = default!;
         //public int Age { get; set; } = default!;
         public string Address { get; set; } = default!;
+        public Gender Gender { get; set; } = default!;
         public string Email { get; set; } = default!;
         public string Password { get; set; } = default!;
         public string ConfirmPassword { get; set; } = default!;
@@ -47,6 +49,9 @@ namespace Application.Dtos.RequestDto
 
             RuleFor(s => s.DateOfBirth)
                 .Must(d => d.Year <= (DateTime.Now.Year - 18)).WithMessage("You must be at least 18 years old to register");
+
+            RuleFor(s => s.Gender)
+                .IsInEnum().WithMessage("Invalid gender.");
 
             //RuleFor(s => s.Age).GreaterThan(18).WithMessage("You must be at least 18 years old to register");
         }

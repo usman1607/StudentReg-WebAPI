@@ -1,3 +1,5 @@
+using Application.Helpers;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +10,6 @@ namespace Infrastructure.Persistence.Seeders
 {
     public static class StaffSeeder
     {
-        public static readonly Guid AdminStaffId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
@@ -18,11 +18,10 @@ namespace Infrastructure.Persistence.Seeders
 
             try
             {
-                var adminExists = await context.Staff.AnyAsync(s => s.Id == AdminStaffId);
-                if (!adminExists)
+                if (!await context.Staff.AnyAsync())
                 {
                     // Generate password hash for "Admin@123"
-                    var (hash, salt) = GeneratePasswordHash("Admin@123");
+                    var (hash, salt) = UserHelper.GeneratePasswordHash("Admin@123");
 
                     var adminStaff = new Staff(
                         staffNumber: "ADM/2024/00001",
@@ -31,25 +30,23 @@ namespace Infrastructure.Persistence.Seeders
                         email: "admin@studentreg.com",
                         passwordHash: hash,
                         hashSalt: salt,
-                        phoneNumber: "0000000000",
+                        gender: Gender.Male,
+                        phoneNumber: "09088776654",
                         address: "System",
                         delegation: StaffDelegation.Admin,
                         createdBy: "System"
                     );
 
-                    // Set the specific ID
-                    typeof(BaseEntity).GetProperty("Id")!.SetValue(adminStaff, AdminStaffId);
-
                     context.Staff.Add(adminStaff);
 
                     // Assign Admin role
-                    var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Id == RoleSeeder.AdminRoleId);
+                    var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == RoleNames.Admin);
                     if (adminRole != null)
                     {
                         var userRole = new UserRole
                         {
-                            UserId = AdminStaffId,
-                            RoleId = RoleSeeder.AdminRoleId,
+                            UserId = adminStaff.Id,
+                            RoleId = adminRole.Id,
                             CreatedBy = "System"
                         };
                         context.UserRoles.Add(userRole);
@@ -64,15 +61,6 @@ namespace Infrastructure.Persistence.Seeders
                 logger.LogError(ex, "Error seeding admin staff");
                 throw;
             }
-        }
-
-        private static (string hash, string salt) GeneratePasswordHash(string password)
-        {
-            var salt = Guid.NewGuid().ToString("N")[..16];
-            var hash = Convert.ToBase64String(
-                System.Security.Cryptography.SHA256.HashData(
-                    System.Text.Encoding.UTF8.GetBytes($"{password}{salt}")));
-            return (hash, salt);
         }
     }
 }

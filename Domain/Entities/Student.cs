@@ -14,10 +14,11 @@ namespace Domain.Entities
             string email,
             string passwordHash,
             string hashSalt,
+            Gender gender,
             string phoneNumber,
             string address,
             string createdBy)
-            : base(firstName, lastName, email, passwordHash, hashSalt, phoneNumber, address, UserType.Student)
+            : base(firstName, lastName, email, passwordHash, hashSalt, gender, phoneNumber, address, UserType.Student)
         {
             MatricNumber = matricNumber;
             Status = StudentStatus.Pending;
@@ -25,6 +26,6 @@ namespace Domain.Entities
         }
 
         // EF Core parameterless constructor
-        protected Student() : base("", "", "", "", "", "", "", UserType.Student) { }
+        protected Student() : base("", "", "", "", "", Gender.Male, "", "", UserType.Student) { }
     }
 }
