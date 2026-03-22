@@ -52,7 +52,7 @@ namespace WebAPI.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Register([FromBody] StudentRequestDto request)
+        public async Task<IActionResult> Register(StudentRequestDto request)
         {
             _logger.LogInformation("POST /auth/register - Registering student: {Email}", request.Email);
             

@@ -6,6 +6,7 @@ namespace Domain.Entities
     {
         private readonly List<UserRole> _userRoles = new();
 
+        public string? ProfilePictureUrl { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
@@ -26,7 +27,7 @@ namespace Domain.Entities
             }
         }
 
-        public User(string firstName, string lastName, string email, string passwordHash, string hashSalt, Gender gender, string phoneNumber, string address, UserType userType)
+        public User(string firstName, string lastName, string email, string passwordHash, string hashSalt, Gender gender, string phoneNumber, string address, UserType userType, string? profilePictureUrl = null)
         {
             FirstName = firstName;
             LastName = lastName;
@@ -37,6 +38,7 @@ namespace Domain.Entities
             PhoneNumber = phoneNumber;
             Address = address;
             UserType = userType;
+            ProfilePictureUrl = profilePictureUrl;
         }
 
         public void AddRole(UserRole userRole)
