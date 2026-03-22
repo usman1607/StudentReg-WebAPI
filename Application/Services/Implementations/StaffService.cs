@@ -3,6 +3,7 @@ using Application.Dtos.ResponseDto;
 using Application.Exceptions;
 using Application.Helpers;
 using Application.Repositories;
+using Application.Services.Contracts;
 using Application.Services.Interfaces;
 using AutoMapper;
 using Domain.Entities;
@@ -13,6 +14,7 @@ namespace Application.Services.Implementations
 {
     public class StaffService : IStaffService
     {
+        private readonly IMailService _mailService;
         private readonly IRoleRepository _roleRepository;
         private readonly IStaffRepository _staffRepository;
         private readonly IStudentRepository _studentRepository;
@@ -24,6 +26,7 @@ namespace Application.Services.Implementations
         private readonly ILogger<StaffService> _logger;
 
         public StaffService(
+            IMailService mailService,
             IRoleRepository roleRepository,
             IStaffRepository staffRepository,
             IStudentRepository studentRepository,
@@ -34,6 +37,7 @@ namespace Application.Services.Implementations
             IMapper mapper,
             ILogger<StaffService> logger)
         {
+            _mailService = mailService;
             _roleRepository = roleRepository;
             _staffRepository = staffRepository;
             _studentRepository = studentRepository;
@@ -148,6 +152,22 @@ namespace Application.Services.Implementations
             student.UpdatedDate = DateTime.UtcNow;
 
             await _studentRepository.UpdateAsync(student);
+
+            var reaa = new MailRequest();
+            reaa.To = student.Email;
+            reaa.From = staff.Email;
+
+            var mailRequest = new MailRequest
+            {
+                To = student.Email,
+                From = staff.Email,
+                SenderName = $"{staff.FirstName} {staff.LastName}",
+                ReceiverName = $"{student.FirstName} {student.LastName}",
+                Subject = "Admission Offer",
+                Body = $"Dear {student.FirstName},\n\nCongratulations! You have been offered admission. Please log in to your account for more details.\n\nBest regards,\nUniversity Admissions"
+            };
+
+            await _mailService.SendEmailAsync(mailRequest);
 
             _logger.LogInformation("Student {StudentId} approved. Status changed to OfferedAdmission", studentId);
 

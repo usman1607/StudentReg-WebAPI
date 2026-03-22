@@ -1,9 +1,11 @@
 ﻿using Application.Mappings;
 using Application.Repositories;
+using Application.Services.Contracts;
 using Application.Services.Implementations;
 using Application.Services.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,8 @@ namespace Infrastructure.Extensions
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IMailService, MailService>();
+            services.AddScoped<IFileService, FileService>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(StudentMappingProfile).Assembly);

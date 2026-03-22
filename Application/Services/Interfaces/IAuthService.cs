@@ -1,5 +1,6 @@
 using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services.Interfaces
 {

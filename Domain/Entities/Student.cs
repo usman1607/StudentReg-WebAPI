@@ -17,8 +17,9 @@ namespace Domain.Entities
             Gender gender,
             string phoneNumber,
             string address,
-            string createdBy)
-            : base(firstName, lastName, email, passwordHash, hashSalt, gender, phoneNumber, address, UserType.Student)
+            string createdBy,
+            string? profilePictureUrl = null)
+            : base(firstName, lastName, email, passwordHash, hashSalt, gender, phoneNumber, address, UserType.Student, profilePictureUrl)
         {
             MatricNumber = matricNumber;
             Status = StudentStatus.Pending;

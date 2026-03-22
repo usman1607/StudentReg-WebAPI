@@ -38,6 +38,9 @@ namespace Infrastructure.Persistence.EntityTypeConfigurations
             builder.HasIndex(u => u.Email)
                 .IsUnique();
 
+            builder.Property(u => u.ProfilePictureUrl)
+                .HasColumnName("profile_picture_url");
+
             builder.Property(u => u.Address)
                 .HasColumnName("address")
                 .HasColumnType("varchar(255)");

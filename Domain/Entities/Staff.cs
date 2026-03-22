@@ -18,8 +18,9 @@ namespace Domain.Entities
             string phoneNumber,
             string address,
             StaffDelegation delegation,
-            string createdBy)
-            : base(firstName, lastName, email, passwordHash, hashSalt, gender, phoneNumber, address, UserType.Staff)
+            string createdBy, 
+            string? profilePictureUrl = null)
+            : base(firstName, lastName, email, passwordHash, hashSalt, gender, phoneNumber, address, UserType.Staff, profilePictureUrl)
         {
             StaffNumber = staffNumber;
             Delegation = delegation;
