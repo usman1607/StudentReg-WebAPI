@@ -3,6 +3,7 @@ using Application.Dtos.ResponseDto;
 using Application.Exceptions;
 using Application.Helpers;
 using Application.Repositories;
+using Application.Services.Contracts;
 using Application.Services.Interfaces;
 using Domain.Constants;
 using Domain.Entities;
@@ -16,6 +17,7 @@ namespace Application.Services.Implementations
 {
     public class AuthService : IAuthService
     {
+        private readonly IFileService _fileService;
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IStudentRepository _studentRepository;
@@ -25,6 +27,7 @@ namespace Application.Services.Implementations
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
+            IFileService fileService,
             IUserRepository userRepository,
             IRoleRepository roleRepository,
             IStudentRepository studentRepository,
@@ -33,6 +36,7 @@ namespace Application.Services.Implementations
             IHttpContextAccessor httpContextAccessor,
             ILogger<AuthService> logger)
         {
+            _fileService = fileService;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _studentRepository = studentRepository;
@@ -59,7 +63,7 @@ namespace Application.Services.Implementations
                 _logger.LogWarning("Login failed - invalid password for: {Email}", request.Email);
                 throw new ValidationException("Invalid email or password.");
             }
-
+            
             // Get user roles
             var roles = user.UserRoles
                 .Where(ur => !ur.IsDeleted && ur.Role != null)
@@ -113,6 +117,26 @@ namespace Application.Services.Implementations
             // Create password hash
             var (hash, salt) = UserHelper.GeneratePasswordHash(request.Password);
 
+            var picture = "";
+            /*if (request.ProfilePicture != null && request.ProfilePicture.Length > 0)
+            {
+                using var stream = new MemoryStream();
+                await request.ProfilePicture.CopyToAsync(stream);
+
+                byte[] profilePictureBytes = stream.ToArray();
+                picture = Convert.ToBase64String(profilePictureBytes);
+            }*/
+
+            if (request.ProfilePicture != null && request.ProfilePicture.Length > 0)
+            {
+                var fileName = request.ProfilePicture.ContentType.Split('/')[0];
+                string contentType = request.ProfilePicture.ContentType.Split('/')[1];
+                var name = $"{fileName}_{request.Email}_{Guid.NewGuid()}.{contentType}";
+                picture = await _fileService.UploadFileWithCloudinary(request.ProfilePicture, name);
+            }
+
+
+
             var student = new Student(
                 matricNumber: matricNumber,
                 firstName: request.FirstName,
@@ -123,7 +147,8 @@ namespace Application.Services.Implementations
                 gender: request.Gender,
                 phoneNumber: request.PhoneNo,
                 address: request.Address,
-                createdBy: "Self-Registration"
+                createdBy: "Self-Registration",
+                profilePictureUrl: picture
             );
 
             var role = await _roleRepository.GetByNameAsync(RoleNames.Student);

@@ -1,5 +1,6 @@
 ﻿using Domain.Enums;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Application.Dtos.RequestDto
 {
     public class StudentRequestDto
     {
+        public IFormFile? ProfilePicture { get; set; }
         public string FirstName { get; set; } = default!;
         public string LastName { get; set; } = default!;
         public string PhoneNo { get; set; } = default!;
