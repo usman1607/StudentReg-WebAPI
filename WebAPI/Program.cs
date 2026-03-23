@@ -1,13 +1,12 @@
 using Application.Dtos.RequestDto;
-using Application.Repositories;
 using Asp.Versioning;
 using Domain.Constants;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure.Extensions;
-using Infrastructure.Persistence.Repositories;
 using Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -140,6 +139,15 @@ if (app.Environment.IsDevelopment())
         await DatabaseInitializer.InitializeAsync(app.Services);
     }
 }
+
+app.UseStaticFiles(); // wwwroot
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "uploads")),
+    RequestPath = "/files"
+});
 
 app.UseHttpsRedirection();
 
