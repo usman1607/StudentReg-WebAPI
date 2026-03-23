@@ -1,4 +1,4 @@
-﻿namespace Application.Dtos.Common
+﻿namespace Application.Configurations
 {
     public class MailConfig
     {

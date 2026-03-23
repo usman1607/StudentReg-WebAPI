@@ -16,5 +16,6 @@ namespace Application.Dtos.ResponseDto
         public string UserType { get; set; } = default!;
         public List<string> Roles { get; set; } = new();
         public string? Delegation { get; set; }
+        public string? ProfilePictureUrl { get; set; }
     }
 }
