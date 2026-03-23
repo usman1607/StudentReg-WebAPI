@@ -1,4 +1,4 @@
-﻿using Application.Dtos.Common;
+﻿using Application.Configurations;
 using Application.Dtos.RequestDto;
 using Application.Services.Contracts;
 using Microsoft.Extensions.Logging;
@@ -21,11 +21,10 @@ namespace Infrastructure.Services
         }
 
         public async Task<Response> SendEmailAsync(MailRequest request)
-        {
-            
+        {            
             var apiKey = _mailConfig.ApiKey;
             var client = new SendGridClient(apiKey);
-            var from = new EmailAddress(request.From, request.SenderName);
+            var from = new EmailAddress(_mailConfig.From, _mailConfig.Name);
             var to = new EmailAddress(request.To, request.ReceiverName);
             var plainTextContent = request.Body;
             var htmlContent = $"<strong>{request.Body}</strong>";
@@ -58,10 +57,12 @@ namespace Infrastructure.Services
                     attachments.Add(attachment);
                 }
             }
-            msg.AddAttachments(attachments);
+            if(attachments.Count > 0)
+            {
+                msg.AddAttachments(attachments);
+            }
 
             var response = await client.SendEmailAsync(msg);
-
             return response;
         }
     }

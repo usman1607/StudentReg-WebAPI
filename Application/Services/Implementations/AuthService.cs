@@ -1,3 +1,4 @@
+using Application.Configurations;
 using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
 using Application.Exceptions;
@@ -11,6 +12,7 @@ using Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace Application.Services.Implementations
@@ -25,18 +27,22 @@ namespace Application.Services.Implementations
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly StorageSettings _storageSettings;
 
         public AuthService(
-            IFileService fileService,
+            IFileServiceFactory factory,
             IUserRepository userRepository,
             IRoleRepository roleRepository,
             IStudentRepository studentRepository,
             IJwtService jwtService,
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<AuthService> logger)
+            ILogger<AuthService> logger,
+            IOptions<StorageSettings> settings)
         {
-            _fileService = fileService;
+            _storageSettings = settings.Value;
+            var type = Enum.Parse<FileServiceType>(_storageSettings.StorageType);
+            _fileService = factory.Create(type);
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _studentRepository = studentRepository;
@@ -95,7 +101,8 @@ namespace Application.Services.Implementations
                     LastName = user.LastName,
                     UserType = user.UserType.ToString(),
                     Roles = roles,
-                    Delegation = delegation
+                    Delegation = delegation,
+                    ProfilePictureUrl = user.ProfilePictureUrl
                 }
             };
         }
@@ -132,10 +139,8 @@ namespace Application.Services.Implementations
                 var fileName = request.ProfilePicture.ContentType.Split('/')[0];
                 string contentType = request.ProfilePicture.ContentType.Split('/')[1];
                 var name = $"{fileName}_{request.Email}_{Guid.NewGuid()}.{contentType}";
-                picture = await _fileService.UploadFileWithCloudinary(request.ProfilePicture, name);
+                picture = await _fileService.UploadFile(request.ProfilePicture, name);
             }
-
-
 
             var student = new Student(
                 matricNumber: matricNumber,
@@ -186,7 +191,8 @@ namespace Application.Services.Implementations
                     LastName = createdStudent.LastName,
                     UserType = createdStudent.UserType.ToString(),
                     Roles = roles,
-                    Delegation = null
+                    Delegation = null,
+                    ProfilePictureUrl = picture
                 }
             };
         }
