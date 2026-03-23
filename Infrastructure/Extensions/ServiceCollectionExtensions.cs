@@ -1,4 +1,5 @@
-﻿using Application.Mappings;
+﻿using Application.Configurations;
+using Application.Mappings;
 using Application.Repositories;
 using Application.Services.Contracts;
 using Application.Services.Implementations;
@@ -6,6 +7,7 @@ using Application.Services.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
+using Infrastructure.Services.FileStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +36,16 @@ namespace Infrastructure.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IMailService, MailService>();
-            services.AddScoped<IFileService, FileService>();
+
+            services.AddSingleton<IFileServiceFactory, FileServiceFactory>();
+            services.AddTransient<CloudinaryFileService>();
+            services.AddTransient<LocalFileService>();
+            services.AddTransient<AWSFileService>();            
+
+            // Add Configuration options
+            services.Configure<MailConfig>(configuration.GetSection("MailConfig"));
+            services.Configure<StorageSettings>(configuration.GetSection("StorageSettings"));
+            services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
 
             // AutoMapper
             services.AddAutoMapper(typeof(StudentMappingProfile).Assembly);
