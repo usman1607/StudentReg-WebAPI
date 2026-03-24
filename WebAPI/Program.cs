@@ -161,3 +161,8 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Student Registration API started. Environment: {Environment}", app.Environment.EnvironmentName);
 
 app.Run();
+
+// Make the Program class public for testing using a partial class declaration
+#pragma warning disable CA1050
+public partial class Program { }
+#pragma warning restore CA1050
