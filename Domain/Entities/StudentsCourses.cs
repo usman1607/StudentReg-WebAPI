@@ -10,5 +10,7 @@ namespace Domain.Entities
     {
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
+        public Student Student { get; set; } = default!;
+        public Course Course { get; set; } = default!;
     }
 }

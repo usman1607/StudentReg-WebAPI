@@ -24,6 +24,12 @@ namespace Infrastructure.Persistence.EntityTypeConfigurations
                 .HasColumnType("varchar(50)")
                 .HasConversion<EnumToStringConverter<StudentStatus>>()
                 .IsRequired();
+
+            // Configure StudentCourses relationship
+            builder.HasMany(u => u.StudentsCourses)
+                .WithOne(ur => ur.Student)
+                .HasForeignKey(ur => ur.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

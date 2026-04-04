@@ -13,6 +13,13 @@ namespace Infrastructure.Persistence.Repositories
             _context = context;
         }
 
+        public async Task<Course> AddAsync(Course course)
+        {
+            _context.Courses.Add(course);
+            await _context.SaveChangesAsync();
+            return course;
+        }
+
         public async Task<bool> ExistsAsync(Guid id)
         {
             return await _context.Courses.AnyAsync(c => c.Id == id && !c.IsDeleted);

@@ -4,8 +4,18 @@ namespace Domain.Entities
 {
     public class Student : User
     {
+        private readonly List<StudentsCourses> _studentCourses = new();
         public string MatricNumber { get; set; } = default!;
         public StudentStatus Status { get; set; } = StudentStatus.Pending;
+        public ICollection<StudentsCourses> StudentsCourses
+        {
+            get => _studentCourses;
+            private set
+            {
+                _studentCourses.Clear();
+                _studentCourses.AddRange(value);
+            }
+        }
 
         public Student(
             string matricNumber,
@@ -24,6 +34,11 @@ namespace Domain.Entities
             MatricNumber = matricNumber;
             Status = StudentStatus.Pending;
             CreatedBy = createdBy;
+        }
+
+        public void AddCourses(List<StudentsCourses> studentsCourses)
+        {
+            _studentCourses.AddRange(studentsCourses);
         }
 
         // EF Core parameterless constructor

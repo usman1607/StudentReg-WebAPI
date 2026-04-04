@@ -25,6 +25,11 @@ namespace Infrastructure.Persistence.EntityTypeConfigurations
             builder.HasIndex(c => c.Code)
                 .IsUnique();
 
+            builder.Property(c => c.CreditUnits)
+                .HasColumnName("credit_units")
+                .HasColumnType("int")
+                .IsRequired();
+
             builder.Property(c => c.Description)
                 .HasColumnName("description")
                 .HasColumnType("varchar(255)");

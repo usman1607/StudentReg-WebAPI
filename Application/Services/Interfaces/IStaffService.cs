@@ -13,7 +13,7 @@ namespace Application.Services.Interfaces
 
         // Admin delegation operations
         Task<List<StudentDto>> GetPendingStudentsAsync();
-        Task<StudentDto> ApproveStudentAsync(Guid studentId, Guid staffId);
+        Task<StudentDto> ApproveStudentAsync(Guid studentId, Guid staffId, List<Guid> courseIds);
         Task<StudentDto> RejectStudentAsync(Guid studentId, Guid staffId, string? reason);
 
         // Instructor delegation operations

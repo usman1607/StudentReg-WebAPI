@@ -11,6 +11,7 @@ namespace IntegrationTests.Shared
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         public Mock<IStudentService> StudentServiceMock { get; } = new();
+        public Mock<IStaffService> StaffServiceMock { get; } = new();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {

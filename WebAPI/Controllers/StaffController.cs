@@ -95,12 +95,12 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ApproveStudent([FromRoute] Guid studentId)
+        public async Task<IActionResult> ApproveStudent([FromRoute] Guid studentId, [FromBody] List<Guid> courseIds)
         {
             var staffId = GetCurrentUserId();
             _logger.LogInformation("POST /staff/students/{StudentId}/approve by {StaffId}", studentId, staffId);
 
-            var student = await _staffService.ApproveStudentAsync(studentId, staffId);
+            var student = await _staffService.ApproveStudentAsync(studentId, staffId, courseIds);
             return Ok(student);
         }
 

@@ -39,6 +39,13 @@ namespace Application.Services.Implementations
         {
             _logger.LogInformation("Creating new student with email: {Email}", request.Email);
 
+            var alreadyExists = await _studentRepository.GetByEmailAsync(request.Email);
+            if (alreadyExists != null)
+            {
+                _logger.LogWarning("Student creation failed - Email already exists: {Email}", request.Email);
+                throw new ValidationException($"A student with email '{request.Email}' already exists.");
+            }
+
             // Generate matriculation number
             var matricNumber = UserHelper.GenerateMatricNumber();
 

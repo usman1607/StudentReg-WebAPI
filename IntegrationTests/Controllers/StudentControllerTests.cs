@@ -2,8 +2,10 @@
 using Application.Dtos.RequestDto;
 using Application.Dtos.ResponseDto;
 using Application.Services.Interfaces;
+using Domain.Entities;
 using IntegrationTests.Shared;
 using Moq;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -25,15 +27,24 @@ namespace IntegrationTests.Controllers
         public async Task GetAll_Should_Return_Ok()
         {
             // Arrange
+
+            var studentDto = new StudentDto { Email = "ade@sample.com", FirstName = "Ade", MatricNumber = "STU-01-ABC" };
             _mock.Setup(s => s.SearchAsync(null, null, 1, 10, null))
                 .ReturnsAsync(new PagedResult<StudentDto>(
-                    new List<StudentDto>(), 1, 10, 0));
+                    new List<StudentDto>() { studentDto }, 1, 10, 1));
 
             // Act
             var response = await _client.GetAsync("/api/v1/Students");
-
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<PagedResult<StudentDto>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(result);
+            Assert.Single(result.Items);
+            Assert.Equal(studentDto.Email, result.Items[0].Email);
         }
 
         [Fact]
@@ -42,7 +53,7 @@ namespace IntegrationTests.Controllers
             var id = Guid.NewGuid();
 
             _mock.Setup(s => s.GetByIdAsync(id))
-                .ReturnsAsync((StudentDto)null);
+                .ReturnsAsync((StudentDto?)null);
 
             var response = await _client.GetAsync($"/api/v1/Students/{id}");
 
@@ -80,6 +91,39 @@ namespace IntegrationTests.Controllers
             var response = await _client.PostAsync("/api/v1/Students", content);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Create_Should_Return_BadRequest_When_Inpute_Not_Valid()
+        {
+            var dto = new StudentDto
+            {
+                Id = Guid.NewGuid(),
+                Email = "test@test.com"
+            };
+
+            _mock.Setup(s => s.CreateAsync(It.IsAny<StudentRequestDto>()))
+                .ReturnsAsync(dto);
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(new StudentRequestDto
+                {
+                    FirstName = "John",
+                    LastName = "Doe",
+                    PhoneNo = "1234567890",
+                    DateOfBirth = new DateOnly(2000, 1, 1),
+                    Gender = Domain.Enums.Gender.Male,
+                    Address = "123 Main",
+                    Email = "testtestcom",
+                    Password = "Password",
+                    ConfirmPassword = "Password123"
+                }),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await _client.PostAsync("/api/v1/Students", content);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]

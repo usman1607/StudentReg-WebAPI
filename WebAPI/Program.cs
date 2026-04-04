@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Domain.Constants;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
 using Infrastructure.Extensions;
 using Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -116,6 +117,9 @@ builder.Services.AddInfrastructure(configuration);
 //builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 var app = builder.Build();
+
+// Hangfire Dashboard
+app.UseHangfireDashboard("/hangfire");
 
 // Configure the HTTP request pipeline
 

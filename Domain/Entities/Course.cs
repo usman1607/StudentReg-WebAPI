@@ -10,6 +10,7 @@ namespace Domain.Entities
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
+        public int CreditUnits { get; set; }
         public string? Description { get; set; }
     }
 }

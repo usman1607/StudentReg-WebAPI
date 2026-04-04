@@ -10,7 +10,6 @@ namespace Infrastructure.Services.FileStorage
 {
     public class CloudinaryFileService : IFileService
     {
-
         private readonly Cloudinary _cloudClient;
         private readonly ILogger<CloudinaryFileService> _logger;
         private readonly CloudinarySettings _cloudinaryConfig;

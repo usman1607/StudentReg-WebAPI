@@ -4,6 +4,8 @@ using Application.Repositories;
 using Application.Services.Contracts;
 using Application.Services.Implementations;
 using Application.Services.Interfaces;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
@@ -36,6 +38,7 @@ namespace Infrastructure.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IMailService, MailService>();
+            services.AddScoped<ICourseService, CourseService>();
 
             services.AddSingleton<IFileServiceFactory, FileServiceFactory>();
             services.AddTransient<CloudinaryFileService>();
@@ -46,6 +49,16 @@ namespace Infrastructure.Extensions
             services.Configure<MailConfig>(configuration.GetSection("MailConfig"));
             services.Configure<StorageSettings>(configuration.GetSection("StorageSettings"));
             services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
+
+            // Add Hangfire for background jobs
+            services.AddHangfire(config =>
+                        config.UsePostgreSqlStorage(
+                            configuration.GetConnectionString("DefaultConnection")
+                        ));
+
+            services.AddHangfireServer();
+
+            services.AddScoped<IBackgroundJobs, MyBackgroundJobs>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(StudentMappingProfile).Assembly);
