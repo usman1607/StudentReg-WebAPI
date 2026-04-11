@@ -34,7 +34,7 @@ namespace Application.Helpers
         {
             var year = DateTime.UtcNow.Year;
             var random = new Random().Next(10000, 99999);
-            return $"STU/{year}/{random}";
+            return $"STU-{year}-{random}";
         }
 
         public static bool VerifyPassword(string password, string storedHash, string storedSalt)

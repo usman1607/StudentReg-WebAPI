@@ -2,6 +2,7 @@
 using Application.Repositories;
 using Application.Services.Contracts;
 using Domain.Entities;
+using Domain.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services
@@ -13,14 +14,22 @@ namespace Infrastructure.Services
         private readonly ICourseRepository _courseRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IStudentsCoursesRepository _studentsCoursesRepository;
+        private readonly IEventPublisher _eventPublisher;
 
-        public MyBackgroundJobs(IMailService mailService, ILogger<MyBackgroundJobs> logger, ICourseRepository courseRepository, IStudentRepository studentRepository, IStudentsCoursesRepository studentsCoursesRepository)
+        public MyBackgroundJobs(
+            IMailService mailService,
+            ILogger<MyBackgroundJobs> logger,
+            ICourseRepository courseRepository,
+            IStudentRepository studentRepository,
+            IStudentsCoursesRepository studentsCoursesRepository,
+            IEventPublisher eventPublisher)
         {
             _logger = logger;
             _mailService = mailService;
             _courseRepository = courseRepository;
             _studentRepository = studentRepository;
             _studentsCoursesRepository = studentsCoursesRepository;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task AssignCoursesToStudent(string email, List<Guid> courseIds)
@@ -63,6 +72,14 @@ namespace Infrastructure.Services
                 throw;
             }
             _logger.LogInformation("Assigned courses to student with email: {Email}", email);
+
+            await _eventPublisher.PublishAsync(new CourseAssignedEvent(
+                StudentId: student.Id,
+                StudentEmail: student.Email,
+                MatricNumber: student.MatricNumber,
+                CourseIds: courseIds,
+                CourseCount: allCourses.Count,
+                AssignedAt: DateTime.UtcNow));
         }
 
         public async Task SendStudentApprovalEmail(MailRequest mailRequest)

@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: studentreg-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: studentRegdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: MyPassword123
+    ports:
+      - "5433:5432"   # host port 5433 avoids clash with any local Postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d studentRegdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: studentreg-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  webapi:
+    image: usmantijani/studentreg-webapi:latest # studentreg-webapi:latest   # replaced with your registry image after push
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile
+    container_name: studentreg-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=studentRegdb;Username=postgres;Password=MyPassword123;"
+      JwtSettings__SecretKey: "YourSuperSecretKeyThatIsAtLeast32CharactersLong!"
+      JwtSettings__Issuer: "StudentRegAPI"
+      JwtSettings__Audience: "StudentRegAPI"
+      JwtSettings__ExpirationMinutes: "60"
+      SeedDatabase: "true"
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__VirtualHost: /
+      RabbitMQ__Username: guest
+      RabbitMQ__Password: guest
+      # Add your real keys below (or use a .env file — see .env.example)
+      # MailConfig__ApiKey: ""
+      # CloudinarySettings__CloudName: ""
+      # CloudinarySettings__ApiKey: ""
+      # CloudinarySettings__ApiSecret: ""
+      StorageSettings__StorageType: "Local"
+      StorageSettings__BasePath: "uploads/files"
+    volumes:
+      - uploads_data:/app/uploads
+
+volumes:
+  postgres_data:
+  uploads_data:
+  rabbitmq_data:

@@ -4,11 +4,13 @@ using Application.Dtos.ResponseDto;
 using Application.Exceptions;
 using Application.Helpers;
 using Application.Repositories;
+using Application.Services.Contracts;
 using Application.Services.Interfaces;
 using AutoMapper;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Services.Implementations
@@ -20,19 +22,22 @@ namespace Application.Services.Implementations
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<StudentService> _logger;
+        private readonly IEventPublisher _eventPublisher;
 
         public StudentService(
             IAuthService authService,
             IRoleRepository roleRepository,
             IStudentRepository studentRepository,
             IMapper mapper,
-            ILogger<StudentService> logger)
+            ILogger<StudentService> logger,
+            IEventPublisher eventPublisher)
         {
             _authService = authService;
             _roleRepository = roleRepository;
             _studentRepository = studentRepository;
             _mapper = mapper;
             _logger = logger;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task<StudentDto> CreateAsync(StudentRequestDto request)
@@ -80,6 +85,14 @@ namespace Application.Services.Implementations
             var createdStudent = await _studentRepository.CreateAsync(student);
             _logger.LogInformation("Student created successfully with ID: {StudentId}, MatricNumber: {MatricNumber}",
                 createdStudent.Id, createdStudent.MatricNumber);
+
+            await _eventPublisher.PublishAsync(new StudentRegisteredEvent(
+                StudentId: createdStudent.Id,
+                Email: createdStudent.Email,
+                FirstName: createdStudent.FirstName,
+                LastName: createdStudent.LastName,
+                MatricNumber: createdStudent.MatricNumber,
+                RegisteredAt: DateTime.UtcNow));
 
             return _mapper.Map<StudentDto>(createdStudent);
         }
@@ -228,6 +241,14 @@ namespace Application.Services.Implementations
             await _studentRepository.UpdateAsync(student);
 
             _logger.LogInformation("Student {StudentId} accepted admission. Status changed to Accepted", studentId);
+
+            await _eventPublisher.PublishAsync(new StudentAdmissionAcceptedEvent(
+                StudentId: student.Id,
+                Email: student.Email,
+                FirstName: student.FirstName,
+                LastName: student.LastName,
+                MatricNumber: student.MatricNumber,
+                AcceptedAt: DateTime.UtcNow));
 
             return _mapper.Map<StudentDto>(student);
         }

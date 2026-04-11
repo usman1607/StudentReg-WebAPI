@@ -6,10 +6,13 @@ using Application.Services.Implementations;
 using Application.Services.Interfaces;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Infrastructure.Messaging;
+using Infrastructure.Messaging.Consumers;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.FileStorage;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +65,30 @@ namespace Infrastructure.Extensions
 
             // AutoMapper
             services.AddAutoMapper(typeof(StudentMappingProfile).Assembly);
+
+            // MassTransit + RabbitMQ
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<StudentRegisteredConsumer>();
+                x.AddConsumer<StudentAdmissionAcceptedConsumer>();
+                x.AddConsumer<CourseAssignedConsumer>();
+
+                x.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(
+                        configuration["RabbitMQ:Host"] ?? "localhost",
+                        configuration["RabbitMQ:VirtualHost"] ?? "/",
+                        h =>
+                        {
+                            h.Username(configuration["RabbitMQ:Username"] ?? "guest");
+                            h.Password(configuration["RabbitMQ:Password"] ?? "guest");
+                        });
+
+                    cfg.ConfigureEndpoints(ctx);
+                });
+            });
+
+            services.AddScoped<IEventPublisher, RabbitMqEventPublisher>();
 
             return services;
         }
