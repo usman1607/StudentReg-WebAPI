@@ -3,7 +3,7 @@ name: Deploy to Fly.io
 on:
   push:
     branches:
-      - main        # deploy on every push/merge to main
+      - master        # deploy on every push/merge to main
 
   workflow_dispatch:  # allow manual trigger from GitHub UI
 
