@@ -126,22 +126,19 @@ app.UseHangfireDashboard("/hangfire");
 // Global exception handling (before other middleware)
 app.UseExceptionHandling();
 
-// Swagger UI (Development only)
-if (app.Environment.IsDevelopment())
+// Swagger UI (all environments)
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Student Registration API v1");
-        options.RoutePrefix = "swagger";
-    });
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Student Registration API v1");
+    options.RoutePrefix = "swagger";
+});
 
-    // Initialize database (migrate + seed) in development
-    var seedDatabase = configuration.GetValue<bool>("SeedDatabase");
-    if (seedDatabase)
-    {
-        await DatabaseInitializer.InitializeAsync(app.Services);
-    }
+// Initialize database (migrate + seed)
+var seedDatabase = configuration.GetValue<bool>("SeedDatabase");
+if (seedDatabase)
+{
+    await DatabaseInitializer.InitializeAsync(app.Services);
 }
 
 app.UseStaticFiles(); // wwwroot

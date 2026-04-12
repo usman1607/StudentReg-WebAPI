@@ -62,5 +62,18 @@ namespace WebAPI.Controllers
 
             return CreatedAtAction(nameof(Login), result);
         }
+
+        /// <summary>
+        /// Check if the API is healthy (for monitoring purposes)
+        /// </summary>
+        /// <returns>Health status message</returns>
+        [HttpPost("check")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult Check()
+        {
+            return Ok("I'm healthy.");
+        }
     }
 }

@@ -1,0 +1,44 @@
+# fly.toml - Fly.io deployment configuration for StudentReg WebAPI
+
+app = "studentreg-webapi"   # Change this to a unique name (fly.io requires globally unique app names)
+primary_region = "lhr"      # London — change to nearest: iad (US East), ord (US Central), sin (Singapore), etc.
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+  ASPNETCORE_URLS        = "http://+:8080"
+  StorageSettings__StorageType = "Local"
+  StorageSettings__BasePath    = "uploads/files"
+  JwtSettings__Issuer          = "StudentRegAPI"
+  JwtSettings__Audience        = "StudentRegAPI"
+  JwtSettings__ExpirationMinutes = "60"
+  SeedDatabase = "true"
+
+[[services]]
+  protocol    = "tcp"
+  internal_port = 8080
+
+  [[services.ports]]
+    port     = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port     = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type       = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval      = "15s"
+    timeout       = "2s"
+    grace_period  = "30s"
+
+[mounts]
+  source      = "uploads_data"
+  destination = "/app/uploads"
