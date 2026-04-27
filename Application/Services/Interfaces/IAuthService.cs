@@ -9,6 +9,7 @@ namespace Application.Services.Interfaces
         Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
         Task<AuthResponseDto> RegisterStudentAsync(StudentRequestDto request);
         string GetSignedInEmail();
+        Guid? GetSignedInUserId();
         bool IsStudent();
     }
 }

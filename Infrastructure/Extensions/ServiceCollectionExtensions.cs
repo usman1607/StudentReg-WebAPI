@@ -34,6 +34,7 @@ namespace Infrastructure.Extensions
             services.AddScoped<IUserRoleRepository, UserRoleRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
             services.AddScoped<IStudentsCoursesRepository, StudentsCoursesRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
 
             // Application Services
             services.AddScoped<IStudentService, StudentService>();
@@ -42,6 +43,9 @@ namespace Infrastructure.Extensions
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<ICourseService, CourseService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+
+            services.AddHttpClient<IPaystackService, PaystackService>();
 
             services.AddSingleton<IFileServiceFactory, FileServiceFactory>();
             services.AddTransient<CloudinaryFileService>();
@@ -52,6 +56,8 @@ namespace Infrastructure.Extensions
             services.Configure<MailConfig>(configuration.GetSection("MailConfig"));
             services.Configure<StorageSettings>(configuration.GetSection("StorageSettings"));
             services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
+            services.Configure<PaystackSettings>(configuration.GetSection("PaystackSettings"));
+            services.Configure<BankAccountSettings>(configuration.GetSection("BankAccountSettings"));
 
             // Add Hangfire for background jobs
             services.AddHangfire(config =>

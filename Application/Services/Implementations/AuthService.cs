@@ -202,6 +202,12 @@ namespace Application.Services.Implementations
             return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value ?? "";
         }
 
+        public Guid? GetSignedInUserId()
+        {
+            var value = _httpContextAccessor.HttpContext?.User?.FindFirst("userId")?.Value;
+            return Guid.TryParse(value, out var id) ? id : null;
+        }
+
         public bool IsStudent()
         {
             return _httpContextAccessor.HttpContext?.User?.FindFirst("userType")?.Value == UserType.Student.ToString();

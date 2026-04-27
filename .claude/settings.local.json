@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(cd \"C:\\\\Users\\\\usman.tijani\\\\OneDrive - Interswitch Limited\\\\Desktop\\\\DotNet\\\\StudentReg-WebAPI\" && dotnet build 2>&1)",
-      "Bash(cd \"C:\\\\Users\\\\usman.tijani\\\\OneDrive - Interswitch Limited\\\\Desktop\\\\DotNet\\\\StudentReg-WebAPI\" && dotnet tool install --global dotnet-ef 2>&1 || echo \"Tool may already be installed or error occurred\")"
+      "Bash(cd \"C:\\\\Users\\\\usman.tijani\\\\OneDrive - Interswitch Limited\\\\Desktop\\\\DotNet\\\\StudentReg-WebAPI\" && dotnet tool install --global dotnet-ef 2>&1 || echo \"Tool may already be installed or error occurred\")",
+      "Bash(dotnet build *)",
+      "Bash(dotnet ef *)"
     ]
   }
 }
